@@ -1,0 +1,74 @@
+-- DDL Statements
+-- Create a table for employees
+CREATE TABLE employees (
+    employee_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    salary DECIMAL(10, 2),
+    hire_date DATE
+);
+
+-- Create a view to display high salary employees
+CREATE VIEW high_salary_employees AS
+SELECT name, salary
+FROM employees
+WHERE salary > 50000;
+
+-- Create an index on the employee_id column
+CREATE INDEX idx_employee_id ON employees (employee_id);
+
+-- Create a sequence for generating employee IDs
+CREATE SEQUENCE employee_id_seq START WITH 1 INCREMENT BY 1;
+
+-- Create a synonym for the employees table
+CREATE SYNONYM emp FOR employees;
+
+-- Add a foreign key constraint to link employees to departments
+ALTER TABLE employees
+ADD CONSTRAINT fk_department
+FOREIGN KEY (department_id)
+REFERENCES departments(department_id);
+
+-- DML Queries
+-- Insert a new employee
+INSERT INTO employees (employee_id, name, salary, hire_date)
+VALUES (employee_id_seq.NEXTVAL, 'John Doe', 60000, '2023-11-01');
+
+-- Retrieve high salary employees
+SELECT name, salary
+FROM high_salary_employees;
+
+-- Update the salary of an employee
+UPDATE employees
+SET salary = salary * 1.1
+WHERE name = 'John Doe';
+
+-- Delete an employee
+DELETE FROM employees
+WHERE name = 'John Doe';
+
+-- Use UNION to combine results
+SELECT name, salary
+FROM employees
+WHERE salary > 50000
+UNION
+SELECT name, salary
+FROM temporary_employees
+WHERE contract_end_date > '2023-12-31';
+
+-- Calculate the average salary
+SELECT AVG(salary) AS avg_salary
+FROM employees;
+
+-- Find the maximum salary
+SELECT MAX(salary) AS max_salary
+FROM employees;
+
+-- Count employees in each department
+SELECT department_id, COUNT(*) AS employee_count
+FROM employees
+GROUP BY department_id;
+
+-- Join employees and departments to get department names
+SELECT e.name, d.department_name
+FROM employees e
+INNER JOIN departments d ON e.department_id = d.department_id;

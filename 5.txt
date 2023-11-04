@@ -1,0 +1,86 @@
+use college;
+
+-- Create the source table N_Roll_Call
+CREATE TABLE N_Roll_Call (
+  Student_ID INT,
+  Attendance_Date DATE,
+  Attendance_Status VARCHAR(255)
+);
+
+-- Create the destination table O_Roll_Call
+CREATE TABLE O_Roll_Call (
+  Student_ID INT,
+  Attendance_Date DATE,
+  Attendance_Status VARCHAR(255)
+);
+
+-- Add dummy data to the N_Roll_Call table
+INSERT INTO N_Roll_Call (Student_ID, Attendance_Date, Attendance_Status)
+VALUES
+  (1, '2023-01-01', 'Present'),
+  (2, '2023-01-01', 'Present'),
+  (3, '2023-01-01', 'Absent'),
+  (1, '2023-01-02', 'Present'),
+  (2, '2023-01-02', 'Absent');
+
+-- Add dummy data to the O_Roll_Call table
+INSERT INTO O_Roll_Call (Student_ID, Attendance_Date, Attendance_Status)
+VALUES
+  (1, '2023-01-01', 'Present'),
+  (3, '2023-01-01', 'Absent'),
+  (1, '2023-01-03', 'Present'),
+  (2, '2023-01-03', 'Present');
+
+
+DELIMITER //
+CREATE PROCEDURE MergeData()
+BEGIN
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE v_student_id INT;
+  DECLARE v_date DATE;
+  DECLARE v_status VARCHAR(255);
+
+  -- Declare a cursor for the source table (N_Roll_Call)
+  DECLARE c_new_data_cursor CURSOR FOR
+    SELECT Student_ID, Attendance_Date, Attendance_Status
+    FROM N_Roll_Call;
+
+  -- Declare handler for NOT FOUND condition
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+  OPEN c_new_data_cursor;
+
+  read_loop: LOOP
+    FETCH c_new_data_cursor INTO v_student_id, v_date, v_status;
+
+    IF done THEN
+      LEAVE read_loop;
+    END IF;
+
+    -- Check if the data already exists in the destination table (O_Roll_Call)
+    IF NOT EXISTS (SELECT 1 FROM O_Roll_Call WHERE Student_ID = v_student_id AND Attendance_Date = v_date) THEN
+      -- Data doesn't exist, so insert it into the destination table
+      INSERT INTO O_Roll_Call (Student_ID, Attendance_Date, Attendance_Status)
+      VALUES (v_student_id, v_date, v_status);
+    END IF;
+  END LOOP;
+
+  CLOSE c_new_data_cursor;
+
+  -- Commit the transaction
+  COMMIT;
+
+  SELECT 'Data merge completed successfully' AS Message;
+END;
+//
+DELIMITER ;
+
+
+-- Call the MergeData procedure to merge data from N_Roll_Call into O_Roll_Call
+CALL MergeData();
+
+select * from O_Roll_Call;
+
+
+
+

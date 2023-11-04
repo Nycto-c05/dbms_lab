@@ -1,0 +1,70 @@
+use prac4;
+
+CREATE TABLE borrower (
+	rollno INT PRIMARY KEY,
+    name VARCHAR(20),
+    dateofissue DATE,
+    nameofbook VARCHAR(20),
+    status VARCHAR(20)
+);
+
+CREATE TABLE fine1 (
+    rollno1 INT,
+    FOREIGN KEY (rollno1) REFERENCES borrower(rollno),
+    returndate DATE,
+    amount INT
+);
+
+-- Insert data into the borrower table
+INSERT INTO borrower VALUES (1, 'abc', '2021-06-01', 'SEPM', 'I');
+INSERT INTO borrower VALUES (2, 'xyz', '2021-05-01', 'OOP', 'I');
+INSERT INTO borrower VALUES (3, 'pqr', '2021-06-15', 'DBMS', 'I');
+INSERT INTO borrower VALUES (4, 'def', '2021-06-30', 'DSA', 'I');
+INSERT INTO borrower VALUES (5, 'lmn', '2021-07-05', 'ADS', 'I');
+
+
+DELIMITER //
+create procedure calc_fine_lib(IN roll INT)
+begin
+	declare f1 int;
+    declare noofdays int;
+    declare issuedate date;
+
+    declare exit handler for sqlexception select 'Error in create table definition';
+
+    select dateofissue into issuedate from borrower where rollno = roll;
+    select datediff(curdate(), issuedate) into noofdays;
+
+    if noofdays > 15 and noofdays <= 30 then
+		set f1 = noofdays * 5;
+	elseif noofdays > 30 then
+		set f1 = ((noofdays - 30)*50 + (30*5));
+	else set f1 = 0;
+
+	end if;
+
+
+    insert into fine1 values(roll, curdate(), f1);
+    update borrower set status = 'R' where rollno = roll;
+
+END //
+DELIMITER ;
+
+
+-- Call the calc_fine_lib procedure for each roll
+CALL calc_fine_lib(1);
+CALL calc_fine_lib(2);
+CALL calc_fine_lib(3);
+CALL calc_fine_lib(4);
+CALL calc_fine_lib(5);
+
+
+select * from fine1;
+
+
+
+
+
+
+
+

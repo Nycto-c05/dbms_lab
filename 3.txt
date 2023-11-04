@@ -1,0 +1,12 @@
+use prac;
+show dbs;
+
+db.createCollection("student_data");
+
+db.student_data.insertOne({name:'sugma', age:420});
+
+db.student_data.find().pretty();
+
+db.student_data.updateOne({name:"ligma"}, {$set:{age:69}});
+
+db.student_data.deleteOne({name:'sugma'});

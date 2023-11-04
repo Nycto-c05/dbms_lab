@@ -1,0 +1,79 @@
+-- Create a "products" table
+CREATE TABLE products (
+    product_id INT PRIMARY KEY,
+    product_name VARCHAR(50),
+    category VARCHAR(20),
+    price DECIMAL(10, 2)
+);
+
+-- Insert dummy data into the "products" table
+INSERT INTO products (product_id, product_name, category, price)
+VALUES (1, 'Laptop', 'Electronics', 899.99);
+
+INSERT INTO products (product_id, product_name, category, price)
+VALUES (2, 'Smartphone', 'Electronics', 499.99);
+
+INSERT INTO products (product_id, product_name, category, price)
+VALUES (3, 'Desk Chair', 'Furniture', 149.99);
+
+INSERT INTO products (product_id, product_name, category, price)
+VALUES (4, 'Coffee Maker', 'Appliances', 39.99);
+
+INSERT INTO products (product_id, product_name, category, price)
+VALUES (5, 'Running Shoes', 'Sports', 79.99);
+
+-- Inner Join: Retrieve a list of employees and their corresponding departments.
+SELECT employees.name, departments.department_name
+FROM employees
+INNER JOIN departments ON employees.department_id = departments.department_id;
+
+-- Left Join: List all departments and the employees working in them, including departments with no employees.
+SELECT departments.department_name, employees.name
+FROM departments
+LEFT JOIN employees ON departments.department_id = employees.department_id;
+
+-- Right Join: Show a list of employees and their respective managers, including employees with no managers.
+SELECT e.name AS employee, m.name AS manager
+FROM employees e
+RIGHT JOIN employees m ON e.manager_id = m.employee_id;
+
+-- Full Outer Join: Retrieve a list of employees and departments, including any unmatched records from both tables.
+SELECT employees.name, departments.department_name
+FROM employees
+FULL OUTER JOIN departments ON employees.department_id = departments.department_id;
+
+-- Self-Join: List employees who have the same manager.
+SELECT e1.name AS employee, e2.name AS colleague
+FROM employees e1
+INNER JOIN employees e2 ON e1.manager_id = e2.manager_id AND e1.employee_id <> e2.employee_id;
+
+-- Subquery: Find employees with salaries greater than the average salary in their department.
+SELECT name, salary
+FROM employees
+WHERE salary > (SELECT AVG(salary) FROM employees WHERE department_id = employees.department_id);
+
+-- Correlated Subquery: List departments with the highest average salary and the department's name.
+SELECT department_id, department_name
+FROM departments d
+WHERE (SELECT AVG(salary) FROM employees e WHERE e.department_id = d.department_id) = (
+    SELECT MAX(avg_salary) FROM (
+        SELECT department_id, AVG(salary) AS avg_salary FROM employees GROUP BY department_id
+    )
+);
+
+-- Scalar Subquery: Retrieve the name of the employee with the highest salary.
+SELECT name
+FROM employees
+WHERE salary = (SELECT MAX(salary) FROM employees);
+
+-- Inline View: Create a view that displays employees earning above a certain threshold and use it to filter employees.
+CREATE VIEW high_earning_employees AS
+SELECT name, salary
+FROM employees
+WHERE salary > 80000;
+
+-- Derived Table Subquery: Retrieve a list of employees with their department names using a subquery in the FROM clause.
+SELECT e.name, d.department_name
+FROM (SELECT * FROM employees) e
+INNER JOIN departments d ON e.department_id = d.department_id;
+
