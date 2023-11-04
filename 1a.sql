@@ -48,6 +48,15 @@ CREATE TABLE Borrower (
     FOREIGN KEY (loan_no) REFERENCES Loan(loan_no)
 );
 
+
+-- Modify the foreign key constraint for Borrower to allow ON DELETE CASCADE
+ALTER TABLE Borrower
+DROP FOREIGN KEY Borrower_ibfk_2;
+
+ALTER TABLE Borrower
+ADD CONSTRAINT Borrower_ibfk_2
+FOREIGN KEY (loan_no) REFERENCES Loan(loan_no) ON DELETE CASCADE;
+
 -- Insert dummy values
 
 -- Insert into Branch table
@@ -85,3 +94,33 @@ INSERT INTO Borrower (cust_name, loan_no) VALUES
     ('Customer1', 101),
     ('Customer2', 102),
     ('Customer3', 103);
+    
+    
+    
+-- Q1. Find all customers who have a loan from the bank. Find their names, loan_no, and loan amount
+SELECT DISTINCT C.cust_name, L.loan_no, L.amount
+FROM customer C
+JOIN Borrower B ON C.cust_name = B.cust_name
+JOIN Loan L ON B.loan_no = L.loan_no;
+
+-- Q2. Find all loan numbers for loans made at Akurdi Branch with a loan amount greater than 12,000
+SELECT L.loan_no
+FROM Loan L
+JOIN branch B ON L.branch_name = B.branch_name
+WHERE B.branch_city = 'Akurdi' AND L.amount > 12000;
+
+-- Q3. Find the average account balance at each branch
+SELECT A.branch_name, AVG(A.balance) AS avg_balance
+FROM Account A
+GROUP BY A.branch_name;
+
+-- Q4. Find all customers who have an account or a loan or both at the bank
+SELECT DISTINCT C.cust_name
+FROM customer C
+LEFT JOIN Depositor D ON C.cust_name = D.cust_name
+LEFT JOIN Borrower B ON C.cust_name = B.cust_name
+WHERE D.cust_name IS NOT NULL OR B.cust_name IS NOT NULL;
+
+-- Q5. Delete all loans with a loan amount between 1300 and 1500
+DELETE FROM Loan
+WHERE amount BETWEEN 1300 AND 1500;
