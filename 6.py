@@ -1,3 +1,4 @@
+# change passwd if error in connectivity: ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';
 import mysql.connector
 
 db = mysql.connector.connect(
